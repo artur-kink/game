@@ -11,7 +11,9 @@ TOOLSOURCES=../gameenginetools/Time/Timer.cpp \
 
 SOURCES=main.cpp \
 		Game.cpp \
+		Drawer.cpp \
 		GameTime.cpp \
+		Map.cpp \
 		$(TOOLSOURCES)
 
 OBJECTS=$(SOURCES:.cpp=.o)

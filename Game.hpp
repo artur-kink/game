@@ -2,6 +2,8 @@
 #define _GAME_HPP
 
 #include "GameTime.hpp"
+#include "Drawer.hpp"
+#include "Map.hpp"
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
@@ -15,12 +17,10 @@ private:
     SDL_Renderer* sdlRenderer;
     SDL_Texture* tilesTexture;
 
-    TTF_Font* font;
-
-
     uint32_t fpsCounter;
     uint32_t updateCounter;
 
+    Map* map;
 public:
 
     Game();
@@ -29,6 +29,7 @@ public:
 
     void start();
     void run();
+    void stop();
  
     void processEvents();
     void update();

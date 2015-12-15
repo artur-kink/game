@@ -20,7 +20,7 @@ uint32_t Game::init(){
         return 1;
     }
 
-    sdlWindow = SDL_CreateWindow("Game", 100, 100, 640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    sdlWindow = SDL_CreateWindow("Game", 100, 100, 1024, 768, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (sdlWindow == NULL){
         std::cout << "SDL_CreateWindow: " << SDL_GetError() << std::endl;
         SDL_Quit();
@@ -46,16 +46,16 @@ uint32_t Game::init(){
         return 5;
     }
 
-    font = TTF_OpenFont("04B03.ttf", 16);
-    if(font == NULL){
-        std::cout << "TTF_OpenFont: " << SDL_GetError() << std::endl;
+    if(Drawer::instance()->init(sdlRenderer)){
+        std::cout << "Drawer::init(): failed" << std::endl;
         return 6;
     }
-
     return 0;
 }
 
 void Game::cleanup(){
+
+    Drawer::instance()->cleanup();
 
     std::cout << "Cleaning up\n";
     if(tilesTexture){
@@ -72,11 +72,6 @@ void Game::cleanup(){
         sdlWindow = NULL;
     }
 
-    if(font){
-        TTF_CloseFont(font);
-        font = NULL;
-    }
-
     TTF_Quit();
     SDL_Quit();
     std::cout << "Cleanup done\n";
@@ -90,6 +85,11 @@ void Game::start(){
     cleanup();
 }
 
+void Game::stop(){
+    std::cout << "Stopping" << std::endl;
+    gameRunning = false;
+}
+
 void Game::run(){
 
     CarryTimer timer(*GameTime::instance());
@@ -100,6 +100,9 @@ void Game::run(){
     fpsCounter = 0;
     uint32_t currentFpsCounter = 0;
 
+    std::cout << "Map time\n";
+    map = new Map(100,100);
+    std::cout << "Map time\n";
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
 
@@ -147,15 +150,17 @@ void Game::processEvents(){
 }
 
 void Game::update(){
-
 }
 
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
 
+    int x = 0;
+    int y = 0;
+    SDL_GetMouseState(&x, &y);
     
-    for(int j = 0; j < 25; j++){
-        for(int i = 0; i < 10; i++){
+    for(int j = 0; j < map->height; j++){
+        for(int i = 0; i < map->width; i++){
             SDL_Rect src;
             src.x = 64;
             src.y = 64;
@@ -172,25 +177,11 @@ void Game::draw(){
         
     }
 
-    char FPSString[20];
-    sprintf(FPSString, "FPS: %d UPS: %d", fpsCounter, updateCounter);
-    SDL_Color color = { 255, 255, 255, 255 };
-    SDL_Surface *textSurface = TTF_RenderText_Solid(font, FPSString, color);
-    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(sdlRenderer, textSurface);
-
-    int textW, textH;
-    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
-    SDL_Rect textRect;
-    textRect.x = 0;
-    textRect.y = 0;
-    textRect.w = textW;
-    textRect.h = textH;
-
-    SDL_RenderCopy(sdlRenderer, textTexture, &textRect, &textRect);
-
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
-    
+    char updatesString[20];
+    sprintf(updatesString, "FPS: %d", fpsCounter);
+    Drawer::instance()->drawText(updatesString, 1, 1); 
+    sprintf(updatesString, "UPS: %d", updateCounter);
+    Drawer::instance()->drawText(updatesString, 1, 14); 
 
     SDL_RenderPresent(sdlRenderer);
     SDL_Delay(1); 
