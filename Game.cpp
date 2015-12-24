@@ -5,6 +5,7 @@
 
 Game::Game(){
     gameRunning = false;
+    offsetX = offsetY = 0;
 }
 
 /**
@@ -101,7 +102,7 @@ void Game::run(){
     uint32_t currentFpsCounter = 0;
 
     std::cout << "Map time\n";
-    map = new Map(100,100);
+    world = new World();
     std::cout << "Map time\n";
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
@@ -150,29 +151,69 @@ void Game::processEvents(){
 }
 
 void Game::update(){
+    const uint8_t* keys = SDL_GetKeyboardState(NULL);
+    if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
+        offsetY-=2;
+    }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
+        offsetY+=2;
+    }
+
+    if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
+        offsetX-=2;
+    }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
+        offsetX+=2;
+    }
+}
+
+#define TILE_WIDTH 64
+#define TILE_HEIGHT 32
+
+#define TILE_WIDTH_HALF TILE_WIDTH/2
+#define TILE_HEIGHT_HALF TILE_HEIGHT/2
+
+void Game::getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry){
+    // Mouse coords to tile coords from http://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes
+    float multiplier = 1.0/(2.0*(float)TILE_WIDTH_HALF*(float)TILE_HEIGHT_HALF);
+    rx = round((multiplier*((float)x * (float)TILE_HEIGHT_HALF + (float)y * (float)TILE_WIDTH_HALF + (-offsetX*TILE_HEIGHT_HALF - offsetY*TILE_WIDTH_HALF))));
+    ry = round((multiplier*((float)x * (-(float)TILE_HEIGHT_HALF) + (float)y * (float)TILE_WIDTH_HALF + (offsetX*TILE_HEIGHT_HALF - offsetY*TILE_WIDTH_HALF))));
+    rx--;
 }
 
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
 
-    int x = 0;
-    int y = 0;
-    SDL_GetMouseState(&x, &y);
-    
-    for(int j = 0; j < map->height; j++){
-        for(int i = 0; i < map->width; i++){
+    int mouseX = 0;
+    int mouseY = 0;
+    SDL_GetMouseState(&mouseX, &mouseY);
+
+    int32_t tileX, tileY;
+    getTile(mouseX, mouseY, tileX, tileY);
+
+    for(uint32_t y = 0; y < 12; y++){
+        for(uint32_t x = 0; x < 12; x++){
             SDL_Rect src;
-            src.x = 64;
-            src.y = 64;
-            src.w = 64;
-            src.h = 64;
-    
+            if(tileX == x && tileY == y){
+                src.x = 64;
+                src.y = 64;
+                src.w = TILE_WIDTH;
+                src.h = TILE_HEIGHT;
+            }else{
+                src.x = 128;
+                src.y = 128;
+                src.w = TILE_WIDTH;
+                src.h = TILE_HEIGHT;
+            }
+
             SDL_Rect dest;
-            dest.x = 64*i + (j%2)*32;
-            dest.y = j*16;
-            dest.w = 64;
-            dest.h = 64;
+            dest.x = TILE_WIDTH_HALF*x - (y*TILE_WIDTH_HALF) + offsetX;
+            dest.y = y*TILE_HEIGHT_HALF + x*TILE_HEIGHT_HALF + offsetY;
+            dest.w = TILE_WIDTH;
+            dest.h = TILE_HEIGHT;
             SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);
+
+            char coords[20];
+            sprintf(coords, "(%d,%d)", x,y);
+            Drawer::instance()->drawText(coords, dest.x+8, dest.y+6); 
         }
         
     }
@@ -182,6 +223,10 @@ void Game::draw(){
     Drawer::instance()->drawText(updatesString, 1, 1); 
     sprintf(updatesString, "UPS: %d", updateCounter);
     Drawer::instance()->drawText(updatesString, 1, 14); 
+
+    char mousePos[20];
+    sprintf(mousePos, "%d,%d -> %d,%d", mouseX, mouseY, tileX, tileY);
+    Drawer::instance()->drawText(mousePos, 1, 28);
 
     SDL_RenderPresent(sdlRenderer);
     SDL_Delay(1); 

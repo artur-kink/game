@@ -3,7 +3,7 @@
 
 #include "GameTime.hpp"
 #include "Drawer.hpp"
-#include "Map.hpp"
+#include "World.hpp"
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
@@ -20,7 +20,11 @@ private:
     uint32_t fpsCounter;
     uint32_t updateCounter;
 
-    Map* map;
+
+    World* world;
+
+    int32_t offsetX;
+    int32_t offsetY;
 public:
 
     Game();
@@ -37,6 +41,7 @@ public:
 
     void cleanup();
 
+    void getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry);
 };
 
 #endif

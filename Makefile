@@ -14,6 +14,7 @@ SOURCES=main.cpp \
 		Drawer.cpp \
 		GameTime.cpp \
 		Map.cpp \
+		World.cpp \
 		$(TOOLSOURCES)
 
 OBJECTS=$(SOURCES:.cpp=.o)

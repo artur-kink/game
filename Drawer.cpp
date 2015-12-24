@@ -38,7 +38,7 @@ void Drawer::drawText(const char* text, int32_t x, int32_t y){
     textRect.h = textH;
 
     SDL_Rect destRect;
-    destRect.x = 0;
+    destRect.x = x;
     destRect.y = y;
     destRect.w = textW;
     destRect.h = textH;
