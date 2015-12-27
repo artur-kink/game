@@ -6,6 +6,8 @@
 Game::Game(){
     gameRunning = false;
     offsetX = offsetY = 0;
+
+    debug = true;
 }
 
 /**
@@ -101,18 +103,18 @@ void Game::run(){
     fpsCounter = 0;
     uint32_t currentFpsCounter = 0;
 
-    std::cout << "Map time\n";
     world = new World();
-    std::cout << "Map time\n";
+    pX = pY = 0;
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
 
         //Update at 60fps
         if(timer.resetOnElapsed(16)){
             currentUpdateCounter++;
-            std::cout << "Update Time: " << GameTime::instance()->getTime() << std::endl;
+            //std::cout << "Update Time: " << GameTime::instance()->getTime() << std::endl;
 
             processEvents();
+            Controls::instance()->update();
 
             update();
         }
@@ -125,8 +127,8 @@ void Game::run(){
             updateCounter = currentUpdateCounter;
             currentUpdateCounter = 0;
 
-            std::cout << "FPS: " << fpsCounter << std::endl;
-            std::cout << "UPS: " << updateCounter << std::endl;
+            //std::cout << "FPS: " << fpsCounter << std::endl;
+            //std::cout << "UPS: " << updateCounter << std::endl;
         }
         currentFpsCounter++;
     
@@ -153,16 +155,19 @@ void Game::processEvents(){
 void Game::update(){
     const uint8_t* keys = SDL_GetKeyboardState(NULL);
     if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
-        offsetY-=2;
+        offsetY-=5;
     }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
-        offsetY+=2;
+        offsetY+=5;
     }
 
     if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
-        offsetX-=2;
+        offsetX-=5;
     }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
-        offsetX+=2;
+        offsetX+=5;
     }
+
+    if(keys[SDL_SCANCODE_TAB])
+        debug = !debug;
 }
 
 #define TILE_WIDTH 64
@@ -182,24 +187,22 @@ void Game::getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry){
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
 
-    int mouseX = 0;
-    int mouseY = 0;
-    SDL_GetMouseState(&mouseX, &mouseY);
 
     int32_t tileX, tileY;
-    getTile(mouseX, mouseY, tileX, tileY);
+    getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
 
     for(uint32_t y = 0; y < 12; y++){
         for(uint32_t x = 0; x < 12; x++){
+            Tile& tile =  world->getTile(x, y);
             SDL_Rect src;
             if(tileX == x && tileY == y){
-                src.x = 64;
-                src.y = 64;
+                src.x = 128;
+                src.y = 128;
                 src.w = TILE_WIDTH;
                 src.h = TILE_HEIGHT;
             }else{
-                src.x = 128;
-                src.y = 128;
+                src.x = (tile.layers[0]%8)*64;
+                src.y = (tile.layers[0]/8)*64;
                 src.w = TILE_WIDTH;
                 src.h = TILE_HEIGHT;
             }
@@ -211,12 +214,27 @@ void Game::draw(){
             dest.h = TILE_HEIGHT;
             SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);
 
-            char coords[20];
-            sprintf(coords, "(%d,%d)", x,y);
-            Drawer::instance()->drawText(coords, dest.x+8, dest.y+6); 
+            if(debug){
+                char coords[20];
+                sprintf(coords, "(%d,%d)", x,y);
+                Drawer::instance()->drawText(coords, dest.x+8, dest.y+6); 
+            }
         }
         
     }
+
+    //Draw temp player
+    SDL_Rect pSrc;
+    pSrc.x = pSrc.y = 192;
+    pSrc.w = TILE_WIDTH;
+    pSrc.h = TILE_HEIGHT;
+    SDL_Rect pDest;
+    pDest.x = TILE_WIDTH_HALF*pX - (pX*TILE_WIDTH_HALF) + offsetX;
+    pDest.y = pY*TILE_HEIGHT_HALF + pY*TILE_HEIGHT_HALF + offsetY;
+    pDest.w = TILE_WIDTH;
+    pDest.h = TILE_HEIGHT;
+    SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
+
 
     char updatesString[20];
     sprintf(updatesString, "FPS: %d", fpsCounter);
@@ -224,9 +242,11 @@ void Game::draw(){
     sprintf(updatesString, "UPS: %d", updateCounter);
     Drawer::instance()->drawText(updatesString, 1, 14); 
 
-    char mousePos[20];
-    sprintf(mousePos, "%d,%d -> %d,%d", mouseX, mouseY, tileX, tileY);
-    Drawer::instance()->drawText(mousePos, 1, 28);
+    if(debug){
+        char mousePos[20];
+        sprintf(mousePos, "%d,%d -> %d,%d", Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
+        Drawer::instance()->drawText(mousePos, 1, 28);
+    }
 
     SDL_RenderPresent(sdlRenderer);
     SDL_Delay(1); 

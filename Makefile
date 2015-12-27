@@ -12,6 +12,7 @@ TOOLSOURCES=../gameenginetools/Time/Timer.cpp \
 SOURCES=main.cpp \
 		Game.cpp \
 		Drawer.cpp \
+		Controls.cpp \
 		GameTime.cpp \
 		Map.cpp \
 		World.cpp \

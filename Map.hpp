@@ -2,6 +2,9 @@
 #define _MAP_HPP
 
 #include <cstdint>
+#include <stdlib.h>
+
+#include "Tile.hpp"
 
 class Map{
 protected:
@@ -9,7 +12,7 @@ protected:
 public:
     uint32_t width;
     uint32_t height;
-    int** map;
+    Tile** map;
 
     Map(uint32_t w, uint32_t h);
 };

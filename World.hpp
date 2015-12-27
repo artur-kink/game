@@ -15,7 +15,7 @@ protected:
 public:
     World();
 
-    int32_t getTile(int32_t x, int32_t y);
+    Tile& getTile(int32_t x, int32_t y);
     
 };
 

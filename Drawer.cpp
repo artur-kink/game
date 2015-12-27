@@ -7,9 +7,8 @@ Drawer::Drawer(){
 }
 
 Drawer* Drawer::instance(){
-    if(drawer == NULL){
+    if(drawer == NULL)
         drawer = new Drawer();
-    }
     return drawer;
 }
 

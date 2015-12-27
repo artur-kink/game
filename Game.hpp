@@ -3,6 +3,7 @@
 
 #include "GameTime.hpp"
 #include "Drawer.hpp"
+#include "Controls.hpp"
 #include "World.hpp"
 
 #include "SDL2/SDL.h"
@@ -23,8 +24,12 @@ private:
 
     World* world;
 
-    int32_t offsetX;
-    int32_t offsetY;
+    int32_t offsetX, offsetY;
+
+    bool debug;
+
+
+    int32_t pX, pY;
 public:
 
     Game();

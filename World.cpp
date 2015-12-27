@@ -9,9 +9,9 @@ World::World(){
             maps[i][j] = 0;
         }
     }
-
+    maps[0][0] = new Map(12,12);
 }
 
-int32_t World::getTile(int32_t x, int32_t y){
-    return 1;
+Tile& World::getTile(int32_t x, int32_t y){
+    return maps[0][0]->map[y][x];
 }
