@@ -114,7 +114,6 @@ void Game::run(){
             //std::cout << "Update Time: " << GameTime::instance()->getTime() << std::endl;
 
             processEvents();
-            Controls::instance()->update();
 
             update();
         }
@@ -153,6 +152,8 @@ void Game::processEvents(){
 }
 
 void Game::update(){
+    Controls::instance()->update();
+
     const uint8_t* keys = SDL_GetKeyboardState(NULL);
     if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
         offsetY-=5;
@@ -168,6 +169,13 @@ void Game::update(){
 
     if(keys[SDL_SCANCODE_TAB])
         debug = !debug;
+
+    int32_t tileX, tileY;
+    getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
+    if(Controls::instance()->wasMouseButtonPressed(Controls::MOUSE_LEFT)){
+        pX = tileX;
+        pY = tileY;
+    }
 }
 
 #define TILE_WIDTH 64
@@ -186,7 +194,6 @@ void Game::getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry){
 
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
-
 
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
@@ -229,8 +236,8 @@ void Game::draw(){
     pSrc.w = TILE_WIDTH;
     pSrc.h = TILE_HEIGHT;
     SDL_Rect pDest;
-    pDest.x = TILE_WIDTH_HALF*pX - (pX*TILE_WIDTH_HALF) + offsetX;
-    pDest.y = pY*TILE_HEIGHT_HALF + pY*TILE_HEIGHT_HALF + offsetY;
+    pDest.x = TILE_WIDTH_HALF*pX - (pY*TILE_WIDTH_HALF) + offsetX;
+    pDest.y = pY*TILE_HEIGHT_HALF + pX*TILE_HEIGHT_HALF + offsetY;
     pDest.w = TILE_WIDTH;
     pDest.h = TILE_HEIGHT;
     SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
