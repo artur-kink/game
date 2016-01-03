@@ -11,11 +11,13 @@ TOOLSOURCES=../gameenginetools/Time/Timer.cpp \
 
 SOURCES=main.cpp \
 		Game.cpp \
-		Drawer.cpp \
+		Graphics/Drawer.cpp \
 		Controls.cpp \
 		GameTime.cpp \
-		Map.cpp \
-		World.cpp \
+		GameEngine/Map.cpp \
+		GameEngine/World.cpp \
+		GameEngine/Entity.cpp \
+		GameEngine/GameEngine.cpp \
 		$(TOOLSOURCES)
 
 OBJECTS=$(SOURCES:.cpp=.o)

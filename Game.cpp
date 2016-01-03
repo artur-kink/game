@@ -5,7 +5,8 @@
 
 Game::Game(){
     gameRunning = false;
-    offsetX = offsetY = 0;
+    offsetX = 350;
+    offsetY = 0;
 
     debug = true;
 }
@@ -103,8 +104,9 @@ void Game::run(){
     fpsCounter = 0;
     uint32_t currentFpsCounter = 0;
 
-    world = new World();
-    pX = pY = 0;
+    player = new Entity(0, 0);
+    engine.addEntity(player);
+
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
 
@@ -173,16 +175,11 @@ void Game::update(){
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
     if(Controls::instance()->wasMouseButtonPressed(Controls::MOUSE_LEFT)){
-        pX = tileX;
-        pY = tileY;
+        player->x = tileX;
+        player->y = tileY;
     }
 }
 
-#define TILE_WIDTH 64
-#define TILE_HEIGHT 32
-
-#define TILE_WIDTH_HALF TILE_WIDTH/2
-#define TILE_HEIGHT_HALF TILE_HEIGHT/2
 
 void Game::getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry){
     // Mouse coords to tile coords from http://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes
@@ -200,7 +197,7 @@ void Game::draw(){
 
     for(uint32_t y = 0; y < 12; y++){
         for(uint32_t x = 0; x < 12; x++){
-            Tile& tile =  world->getTile(x, y);
+            Tile& tile =  engine.world.getTile(x, y);
             SDL_Rect src;
             if(tileX == x && tileY == y){
                 src.x = 128;
@@ -227,7 +224,6 @@ void Game::draw(){
                 Drawer::instance()->drawText(coords, dest.x+8, dest.y+6); 
             }
         }
-        
     }
 
     //Draw temp player
@@ -236,8 +232,8 @@ void Game::draw(){
     pSrc.w = TILE_WIDTH;
     pSrc.h = TILE_HEIGHT;
     SDL_Rect pDest;
-    pDest.x = TILE_WIDTH_HALF*pX - (pY*TILE_WIDTH_HALF) + offsetX;
-    pDest.y = pY*TILE_HEIGHT_HALF + pX*TILE_HEIGHT_HALF + offsetY;
+    pDest.x = TILE_WIDTH_HALF*player->x - (player->y*TILE_WIDTH_HALF) + offsetX;
+    pDest.y = player->y*TILE_HEIGHT_HALF + player->x*TILE_HEIGHT_HALF + offsetY;
     pDest.w = TILE_WIDTH;
     pDest.h = TILE_HEIGHT;
     SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
