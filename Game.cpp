@@ -174,7 +174,7 @@ void Game::update(){
 
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
-    if(Controls::instance()->wasMouseButtonPressed(Controls::MOUSE_LEFT)){
+    if(Controls::instance()->wasMouseButtonClicked(Controls::MOUSE_LEFT)){
         player->x = tileX;
         player->y = tileY;
     }

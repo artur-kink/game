@@ -3,8 +3,11 @@
 Controls* Controls::controls = NULL;
 
 Controls::Controls(){
-    mouseButtonState[MOUSE_LEFT] = BUTTON_UP; 
-    mouseButtonState[MOUSE_RIGHT] = BUTTON_UP; 
+    for(uint32_t i = 0; i < MOUSE_NUMBUTTONS; i++){
+        mouseButtonState[i] = BUTTON_UP;
+        mousePressedTime[i] = new Timer(*GameTime::instance());
+    }
+
 }
 
 Controls* Controls::instance(){
@@ -29,7 +32,14 @@ void Controls::update(){
 void Controls::updateMouseButtonState(MOUSE_BUTTON button, bool isPressed){
     if(isPressed){
         if(!isMouseButtonDown(button))
-            mouseButtonState[button] = BUTTON_PRESSED;
+            {
+            if(mousePressedTime[button]->getElapsedTime() < doublePressTime){
+                mouseButtonState[button] = BUTTON_DOUBLEPRESSED;
+            }else{
+                mouseButtonState[button] = BUTTON_PRESSED;
+            }
+            mousePressedTime[button]->reset();
+            }
         else
             mouseButtonState[button] = BUTTON_DOWN;
     }else{
@@ -40,14 +50,22 @@ void Controls::updateMouseButtonState(MOUSE_BUTTON button, bool isPressed){
     }
 }
 
+uint8_t Controls::getMouseButtonState(MOUSE_BUTTON button){
+    return mouseButtonState[button];
+}
+
 bool Controls::isMouseButtonDown(MOUSE_BUTTON button){
     return mouseButtonState[button] & BUTTON_DOWN;
 }
 
-bool Controls::wasMouseButtonPressed(MOUSE_BUTTON button){
-    return mouseButtonState[button] == BUTTON_PRESSED;
+bool Controls::wasMouseButtonClicked(MOUSE_BUTTON button){
+    return mouseButtonState[button] & BUTTON_PRESSED;
 }
 
 bool Controls::wasMouseButtonReleased(MOUSE_BUTTON button){
     return mouseButtonState[button] == BUTTON_RELEASED;
+}
+
+bool Controls::wasMouseButtonDoubleClicked(MOUSE_BUTTON button){
+    return mouseButtonState[button] == BUTTON_DOUBLEPRESSED;
 }

@@ -3,6 +3,9 @@
 
 #include "SDL2/SDL.h"
 
+#include "GET_Time.hpp"
+#include "GameTime.hpp"
+
 #include <iostream>
 #include <cstdint>
 
@@ -18,7 +21,8 @@ public:
         BUTTON_UP = 0x00,
         BUTTON_DOWN = 0x01,
         BUTTON_RELEASED = 0x02, ///< BUTTON_UP bit is 0
-        BUTTON_PRESSED = 0x03 ///< BUTTON_DOWN bit is 1
+        BUTTON_PRESSED = 0x03, ///< BUTTON_DOWN bit is 1
+        BUTTON_DOUBLEPRESSED = 0x07 ///< BUTTON_DOWN and BUTTON_PRESSED bits are 1
     };
 
 private:
@@ -26,9 +30,14 @@ private:
 
     /** Current state of mouse button */
     uint8_t mouseButtonState[MOUSE_NUMBUTTONS];
+    
+    /** Time when mouse was last pressed */
+    Timer* mousePressedTime[MOUSE_NUMBUTTONS];
 
     Controls();
     void updateMouseButtonState(MOUSE_BUTTON button, bool isPressed);
+
+    uint32_t doublePressTime = 300;
 
 public:
     static Controls* instance();
@@ -38,9 +47,11 @@ public:
 
 
     void update();
+    uint8_t getMouseButtonState(MOUSE_BUTTON button);
     bool isMouseButtonDown(MOUSE_BUTTON button);
-    bool wasMouseButtonPressed(MOUSE_BUTTON button);
+    bool wasMouseButtonClicked(MOUSE_BUTTON button);
     bool wasMouseButtonReleased(MOUSE_BUTTON button);
+    bool wasMouseButtonDoubleClicked(MOUSE_BUTTON button);
 
 };
 
