@@ -17,6 +17,7 @@ SOURCES=main.cpp \
 		GameEngine/Map.cpp \
 		GameEngine/World.cpp \
 		GameEngine/Entity.cpp \
+		GameEngine/Action.cpp \
 		GameEngine/GameEngine.cpp \
 		$(TOOLSOURCES)
 
@@ -32,4 +33,5 @@ $(OBJECTS): %.o: %.cpp
 
 clean:
 	rm -f Debug/game
-	rm *.o *.o.d
+	rm -f *.o *.o.d
+	rm -f */*.o */*.o.d

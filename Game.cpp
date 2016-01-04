@@ -175,9 +175,10 @@ void Game::update(){
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
     if(Controls::instance()->wasMouseButtonClicked(Controls::MOUSE_LEFT)){
-        player->x = tileX;
-        player->y = tileY;
+        engine.addAction(new MoveAction(player->entityId, tileX, tileY));
     }
+
+    engine.update();
 }
 
 
@@ -237,7 +238,6 @@ void Game::draw(){
     pDest.w = TILE_WIDTH;
     pDest.h = TILE_HEIGHT;
     SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
-
 
     char updatesString[20];
     sprintf(updatesString, "FPS: %d", fpsCounter);
