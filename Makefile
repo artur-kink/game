@@ -4,7 +4,7 @@ CC=g++
 
 INCLUDES=-I../gameenginetools/
 CFLAGS=-c -g -Wall -std=c++11 $(INCLUDES) -MMD -MP -MF 
-LFLAGS=-Wall -g -lSDL2 -lSDL2_image -lSDL2_ttf
+LFLAGS=-Wall -g -lSDL2 -lSDL2_image -lSDL2_ttf -lglog
 
 TOOLSOURCES=../gameenginetools/Time/Timer.cpp \
 			../gameenginetools/Time/CarryTimer.cpp

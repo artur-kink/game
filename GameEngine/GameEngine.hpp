@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "glog/logging.h"
+
 class GameEngine{
 protected:
     std::vector<Entity*> entities;

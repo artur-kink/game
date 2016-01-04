@@ -11,6 +11,7 @@ static void interrupt_handler(int signal){
 
 int main(int argc, char** argv){
 
+    std::cout << "Starting main...\n";
     if(signal(SIGINT, interrupt_handler) == SIG_ERR){
         return 1;
     }

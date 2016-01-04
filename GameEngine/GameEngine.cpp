@@ -38,5 +38,6 @@ void GameEngine::addEntity(Entity* entity){
 
 
 void GameEngine::addAction(Action* action){
+    LOG(INFO) << "Added action\n";
     actionQueue.push_back(action);
 }

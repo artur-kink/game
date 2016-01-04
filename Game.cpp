@@ -9,6 +9,12 @@ Game::Game(){
     offsetY = 0;
 
     debug = true;
+
+    //Enable glog logging
+    google::InitGoogleLogging("game");
+    FLAGS_log_dir = ".";
+    FLAGS_logtostderr = true;
+    LOG(INFO) << "Initialized logging\n";
 }
 
 /**
@@ -20,13 +26,13 @@ uint32_t Game::init(){
     sdlRenderer = NULL;
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0){
-        std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "SDL_Init Error: " << SDL_GetError() << "\n";
         return 1;
     }
 
     sdlWindow = SDL_CreateWindow("Game", 100, 100, 1024, 768, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (sdlWindow == NULL){
-        std::cout << "SDL_CreateWindow: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "SDL_CreateWindow: " << SDL_GetError() << "\n";
         SDL_Quit();
         return 2;
     }
@@ -34,24 +40,24 @@ uint32_t Game::init(){
     sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED);
     if (sdlRenderer == NULL){
         SDL_DestroyWindow(sdlWindow);
-        std::cout << "SDL_CreateRenderer: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "SDL_CreateRenderer: " << SDL_GetError() << "\n";
         SDL_Quit();
         return 3;
     }
 
     tilesTexture = IMG_LoadTexture(sdlRenderer, "tiles.png");
     if (tilesTexture == NULL){
-        std::cout << "IMG_LoadTexture: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
         return 4;
     }
 
     if(TTF_Init()){
-        std::cout << "TTF_Init: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "TTF_Init: " << SDL_GetError() << "\n";
         return 5;
     }
 
     if(Drawer::instance()->init(sdlRenderer)){
-        std::cout << "Drawer::init(): failed" << std::endl;
+        LOG(ERROR) << "Drawer::init(): failed" << "\n";
         return 6;
     }
     return 0;
@@ -61,7 +67,7 @@ void Game::cleanup(){
 
     Drawer::instance()->cleanup();
 
-    std::cout << "Cleaning up\n";
+    LOG(INFO) << "Cleaning up\n";
     if(tilesTexture){
         SDL_DestroyTexture(tilesTexture);
     }
@@ -78,19 +84,19 @@ void Game::cleanup(){
 
     TTF_Quit();
     SDL_Quit();
-    std::cout << "Cleanup done\n";
+    LOG(INFO) << "Cleanup done\n";
 }
 
 void Game::start(){
-    std::cout << "Starting\n";
+    LOG(INFO) << "Starting\n";
     gameRunning = true;
     run();
-    std::cout << "Done run\n";
+    LOG(INFO) << "Done run\n";
     cleanup();
 }
 
 void Game::stop(){
-    std::cout << "Stopping" << std::endl;
+    LOG(INFO) << "Stopping" << std::endl;
     gameRunning = false;
 }
 

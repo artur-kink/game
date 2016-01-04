@@ -59,7 +59,7 @@ bool Controls::isMouseButtonDown(MOUSE_BUTTON button){
 }
 
 bool Controls::wasMouseButtonClicked(MOUSE_BUTTON button){
-    return mouseButtonState[button] & BUTTON_PRESSED;
+    return mouseButtonState[button] == BUTTON_PRESSED || mouseButtonState[button] == BUTTON_DOUBLEPRESSED;
 }
 
 bool Controls::wasMouseButtonReleased(MOUSE_BUTTON button){
