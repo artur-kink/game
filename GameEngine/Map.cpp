@@ -9,6 +9,9 @@ Map::Map(uint32_t w, uint32_t h){
         map[i] = new Tile[w];
         for(uint32_t j = 0; j < w; j++){
             map[i][j].layers[0] = rand() % 15 + 1;
+            
+            if(rand() % 5 == 0)
+                map[i][j].setBlocked(true);
         }
     }
 }

@@ -11,9 +11,9 @@ Game::Game(){
     debug = true;
 
     //Enable glog logging
-    google::InitGoogleLogging("game");
     FLAGS_log_dir = ".";
     FLAGS_logtostderr = true;
+    google::InitGoogleLogging("game");
     LOG(INFO) << "Initialized logging\n";
 }
 
@@ -181,7 +181,8 @@ void Game::update(){
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
     if(Controls::instance()->wasMouseButtonClicked(Controls::MOUSE_LEFT)){
-        engine.addAction(new MoveAction(player->entityId, tileX, tileY));
+        if(!engine.world.getTile(tileX, tileY).isBlocked())
+           engine.addAction(new MoveAction(player->entityId, tileX, tileY));
     }
 
     engine.update();

@@ -15,8 +15,17 @@ class Tile{
 protected:
 
 public:
+
+    enum TileAttributes{
+        Blocked = 1
+    };
+
     uint16_t layers[NUM_LAYERS];
-    bool blocked;
+    uint8_t attributes;
+
+
+    bool isBlocked();
+    bool setBlocked(bool val = true);
 
 };
 

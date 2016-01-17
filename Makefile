@@ -14,6 +14,7 @@ SOURCES=main.cpp \
 		Graphics/Drawer.cpp \
 		Controls.cpp \
 		GameTime.cpp \
+		GameEngine/Tile.cpp \
 		GameEngine/Map.cpp \
 		GameEngine/World.cpp \
 		GameEngine/Entity.cpp \
