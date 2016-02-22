@@ -17,7 +17,9 @@ SOURCES=main.cpp \
 		GameEngine/Tile.cpp \
 		GameEngine/Map.cpp \
 		GameEngine/World.cpp \
-		GameEngine/Entity.cpp \
+		GameEngine/Entities/Entity.cpp \
+		GameEngine/Entities/PlayerEntity.cpp \
+		GameEngine/Entities/DummyEnemy.cpp \
 		GameEngine/Action.cpp \
 		GameEngine/GameEngine.cpp \
 		$(TOOLSOURCES)

@@ -2,7 +2,7 @@
 #define _GAMEENGINE_HPP
 
 #include "World.hpp"
-#include "Entity.hpp"
+#include "Entities/Entities.hpp"
 #include "Action.hpp"
 
 #include <vector>
@@ -11,12 +11,13 @@
 
 class GameEngine{
 protected:
-    std::vector<Entity*> entities;
 
     std::vector<Action*> actionQueue;
 
     static GameEngine* gameEngine;
 public:
+    std::vector<Entity*> entities;
+
     World world;
 
     GameEngine();
@@ -24,6 +25,7 @@ public:
     GameEngine* instance();
 
     void update();
+    void doTurn();
     void addEntity(Entity* entity);
 
 

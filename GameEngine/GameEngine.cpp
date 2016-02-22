@@ -31,7 +31,14 @@ void GameEngine::update(){
     }
 }
 
+void GameEngine::doTurn(){
+    for(uint32_t i = 0; i < entities.size(); i++){
+        entities.at(i)->turn();
+    }
+}
+
 void GameEngine::addEntity(Entity* entity){
+    LOG(INFO) << "Added entity\n";
     entities.push_back(entity);
     entity->entityId = entities.size()-1;
 }

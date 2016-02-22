@@ -9,10 +9,6 @@ Entity::Entity(int32_t sX, int32_t sY){
     y = sY;
 }
 
-void Entity::turn(){
-
-}
-
 void Entity::update(){
 
 }

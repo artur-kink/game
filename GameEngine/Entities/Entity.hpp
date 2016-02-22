@@ -16,7 +16,7 @@ public:
     void update();
 
     /** Force entity to perform its turn. */
-    void turn();
+    virtual void turn() = 0;
 
 };
 

@@ -110,8 +110,11 @@ void Game::run(){
     fpsCounter = 0;
     uint32_t currentFpsCounter = 0;
 
-    player = new Entity(0, 0);
+    player = new PlayerEntity();
     engine.addEntity(player);
+
+    DummyEnemy* dummy = new DummyEnemy();
+    engine.addEntity(dummy);
 
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
@@ -181,8 +184,10 @@ void Game::update(){
     int32_t tileX, tileY;
     getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
     if(Controls::instance()->wasMouseButtonClicked(Controls::MOUSE_LEFT)){
-        if(!engine.world.getTile(tileX, tileY).isBlocked())
-           engine.addAction(new MoveAction(player->entityId, tileX, tileY));
+        if(!engine.world.getTile(tileX, tileY).isBlocked()){
+            engine.addAction(new MoveAction(player->entityId, tileX, tileY));
+            engine.doTurn();
+        }
     }
 
     engine.update();
@@ -234,17 +239,21 @@ void Game::draw(){
         }
     }
 
-    //Draw temp player
-    SDL_Rect pSrc;
-    pSrc.x = pSrc.y = 192;
-    pSrc.w = TILE_WIDTH;
-    pSrc.h = TILE_HEIGHT;
-    SDL_Rect pDest;
-    pDest.x = TILE_WIDTH_HALF*player->x - (player->y*TILE_WIDTH_HALF) + offsetX;
-    pDest.y = player->y*TILE_HEIGHT_HALF + player->x*TILE_HEIGHT_HALF + offsetY;
-    pDest.w = TILE_WIDTH;
-    pDest.h = TILE_HEIGHT;
-    SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
+    //Draw Entities
+    for(uint32_t i = 0; i < engine.entities.size(); i++){
+        Entity* entity = engine.entities.at(i);
+        SDL_Rect pSrc;
+        pSrc.x = pSrc.y = 192;
+        pSrc.w = TILE_WIDTH;
+        pSrc.h = TILE_HEIGHT;
+
+        SDL_Rect pDest;
+        pDest.x = TILE_WIDTH_HALF*entity->x - (entity->y*TILE_WIDTH_HALF) + offsetX;
+        pDest.y = entity->y*TILE_HEIGHT_HALF + entity->x*TILE_HEIGHT_HALF + offsetY;
+        pDest.w = TILE_WIDTH;
+        pDest.h = TILE_HEIGHT;
+        SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
+    }
 
     char updatesString[20];
     sprintf(updatesString, "FPS: %d", fpsCounter);
