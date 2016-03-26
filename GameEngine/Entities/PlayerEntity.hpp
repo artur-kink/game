@@ -7,6 +7,7 @@ class PlayerEntity:public Entity{
 public:
     PlayerEntity();
 
+    /** Player turns are handled manually in the engine. */
     virtual void turn(){};
 };
 

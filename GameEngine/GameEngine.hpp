@@ -15,6 +15,8 @@ protected:
     std::vector<Action*> actionQueue;
 
     static GameEngine* gameEngine;
+
+    Entity* player;
 public:
     std::vector<Entity*> entities;
 
@@ -22,7 +24,7 @@ public:
 
     GameEngine();
 
-    GameEngine* instance();
+    static GameEngine* instance();
 
     void update();
     void doTurn();
@@ -30,6 +32,9 @@ public:
 
 
     void addAction(Action* action);
+
+    Entity* getPlayer();
+    void setPlayer(Entity* p);
 };
 
 #endif

@@ -112,6 +112,7 @@ void Game::run(){
 
     player = new PlayerEntity();
     engine.addEntity(player);
+    engine.setPlayer(player);
 
     DummyEnemy* dummy = new DummyEnemy();
     engine.addEntity(dummy);

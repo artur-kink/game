@@ -3,6 +3,8 @@
 
 #include "Entity.hpp"
 
+#include "../GameEngine.hpp"
+
 class DummyEnemy:public Entity{
 
 public:

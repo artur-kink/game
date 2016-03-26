@@ -48,3 +48,11 @@ void GameEngine::addAction(Action* action){
     LOG(INFO) << "Added action\n";
     actionQueue.push_back(action);
 }
+
+Entity* GameEngine::getPlayer(){
+    return player;
+}
+
+void GameEngine::setPlayer(Entity* p){
+    player = p;
+}
