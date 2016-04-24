@@ -19,8 +19,6 @@ SOURCES=main.cpp \
 		GameEngine/World.cpp \
 		GameEngine/Entities/Entity.cpp \
 		GameEngine/Entities/PlayerEntity.cpp \
-		GameEngine/Entities/DummyEnemy.cpp \
-		GameEngine/Action.cpp \
 		GameEngine/GameEngine.cpp \
 		$(TOOLSOURCES)
 
@@ -38,3 +36,4 @@ clean:
 	rm -f Debug/game
 	rm -f *.o *.o.d
 	rm -f */*.o */*.o.d
+	rm -f */*/*.o */*/*.o.d

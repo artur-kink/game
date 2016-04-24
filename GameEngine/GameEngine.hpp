@@ -3,7 +3,6 @@
 
 #include "World.hpp"
 #include "Entities/Entities.hpp"
-#include "Action.hpp"
 
 #include <vector>
 
@@ -11,8 +10,6 @@
 
 class GameEngine{
 protected:
-
-    std::vector<Action*> actionQueue;
 
     static GameEngine* gameEngine;
 
@@ -27,11 +24,8 @@ public:
     static GameEngine* instance();
 
     void update();
-    void doTurn();
     void addEntity(Entity* entity);
 
-
-    void addAction(Action* action);
 
     Entity* getPlayer();
     void setPlayer(Entity* p);

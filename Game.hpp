@@ -19,6 +19,7 @@ private:
     SDL_Window* sdlWindow;
     SDL_Renderer* sdlRenderer;
     SDL_Texture* tilesTexture;
+    SDL_Texture* spritesTexture;
 
     uint32_t fpsCounter;
     uint32_t updateCounter;
@@ -45,8 +46,6 @@ public:
     void draw();
 
     void cleanup();
-
-    void getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry);
 };
 
 #endif

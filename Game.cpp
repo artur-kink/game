@@ -25,17 +25,21 @@ uint32_t Game::init(){
     sdlWindow = NULL;
     sdlRenderer = NULL;
 
+    LOG(INFO) << "Initializing SDL\n";
     if (SDL_Init(SDL_INIT_VIDEO) != 0){
         LOG(ERROR) << "SDL_Init Error: " << SDL_GetError() << "\n";
         return 1;
     }
+    LOG(INFO) << "SDL Initialized\n";
 
+    LOG(INFO) << "Creating Window\n";
     sdlWindow = SDL_CreateWindow("Game", 100, 100, 1024, 768, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (sdlWindow == NULL){
         LOG(ERROR) << "SDL_CreateWindow: " << SDL_GetError() << "\n";
         SDL_Quit();
         return 2;
     }
+    LOG(INFO) << "Window Created\n";
 
     sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED);
     if (sdlRenderer == NULL){
@@ -45,21 +49,32 @@ uint32_t Game::init(){
         return 3;
     }
 
+    LOG(INFO) << "Loading Textures\n";
     tilesTexture = IMG_LoadTexture(sdlRenderer, "tiles.png");
     if (tilesTexture == NULL){
         LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
         return 4;
     }
 
+    spritesTexture = IMG_LoadTexture(sdlRenderer, "sprites.png");
+    if (spritesTexture == NULL){
+        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
+        return 4;
+    }
+    LOG(INFO) << "Textures Loaded\n";
+
+    LOG(INFO) << "Initializing TTF\n";
     if(TTF_Init()){
         LOG(ERROR) << "TTF_Init: " << SDL_GetError() << "\n";
         return 5;
     }
+    LOG(INFO) << "TTF Initialized\n";
 
     if(Drawer::instance()->init(sdlRenderer)){
         LOG(ERROR) << "Drawer::init(): failed" << "\n";
         return 6;
     }
+    LOG(INFO) << "Initialized\n";
     return 0;
 }
 
@@ -114,9 +129,6 @@ void Game::run(){
     engine.addEntity(player);
     engine.setPlayer(player);
 
-    DummyEnemy* dummy = new DummyEnemy();
-    engine.addEntity(dummy);
-
     while(gameRunning){
         GameTime::instance()->updateFrameTime();
 
@@ -167,67 +179,56 @@ void Game::update(){
     Controls::instance()->update();
 
     const uint8_t* keys = SDL_GetKeyboardState(NULL);
-    if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
-        offsetY-=5;
-    }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
-        offsetY+=5;
-    }
+    if(keys[SDL_SCANCODE_LSHIFT]){
+        if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
+            offsetY-=5;
+        }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
+            offsetY+=5;
+        }
 
-    if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
-        offsetX-=5;
-    }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
-        offsetX+=5;
-    }
+        if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
+            offsetX-=5;
+        }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
+            offsetX+=5;
+        }
+    }else{
+        uint8_t direction = 0;
+        if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
+            direction = PlayerEntity::Up;
+        }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
+            direction = PlayerEntity::Down;
+        }
+
+        if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
+            direction |= PlayerEntity::Left;
+        }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
+            direction |= PlayerEntity::Right;
+        }
+        
+        ((PlayerEntity*)player)->setMoveDirection(direction);
+    }   
 
     if(keys[SDL_SCANCODE_TAB])
         debug = !debug;
 
-    int32_t tileX, tileY;
-    getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
-    if(Controls::instance()->wasMouseButtonClicked(Controls::MOUSE_LEFT)){
-        if(!engine.world.getTile(tileX, tileY).isBlocked()){
-            engine.addAction(new MoveAction(player->entityId, tileX, tileY));
-            engine.doTurn();
-        }
-    }
-
     engine.update();
-}
-
-
-void Game::getTile(int32_t x, int32_t y, int32_t& rx, int32_t& ry){
-    // Mouse coords to tile coords from http://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes
-    float multiplier = 1.0/(2.0*(float)TILE_WIDTH_HALF*(float)TILE_HEIGHT_HALF);
-    rx = round((multiplier*((float)x * (float)TILE_HEIGHT_HALF + (float)y * (float)TILE_WIDTH_HALF + (-offsetX*TILE_HEIGHT_HALF - offsetY*TILE_WIDTH_HALF))));
-    ry = round((multiplier*((float)x * (-(float)TILE_HEIGHT_HALF) + (float)y * (float)TILE_WIDTH_HALF + (offsetX*TILE_HEIGHT_HALF - offsetY*TILE_WIDTH_HALF))));
-    rx--;
 }
 
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
 
-    int32_t tileX, tileY;
-    getTile(Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
-
     for(uint32_t y = 0; y < 12; y++){
         for(uint32_t x = 0; x < 12; x++){
             Tile& tile =  engine.world.getTile(x, y);
             SDL_Rect src;
-            if(tileX == x && tileY == y){
-                src.x = 128;
-                src.y = 128;
-                src.w = TILE_WIDTH;
-                src.h = TILE_HEIGHT;
-            }else{
-                src.x = (tile.layers[0]%8)*64;
-                src.y = (tile.layers[0]/8)*64;
-                src.w = TILE_WIDTH;
-                src.h = TILE_HEIGHT;
-            }
+            src.x = (tile.layers[0]%30)*32;
+            src.y = (tile.layers[0]/30)*32;
+            src.w = TILE_WIDTH;
+            src.h = TILE_HEIGHT;
 
             SDL_Rect dest;
-            dest.x = TILE_WIDTH_HALF*x - (y*TILE_WIDTH_HALF) + offsetX;
-            dest.y = y*TILE_HEIGHT_HALF + x*TILE_HEIGHT_HALF + offsetY;
+            dest.x = TILE_WIDTH*x + offsetX;
+            dest.y = TILE_HEIGHT*y + offsetY;
             dest.w = TILE_WIDTH;
             dest.h = TILE_HEIGHT;
             SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);
@@ -244,16 +245,16 @@ void Game::draw(){
     for(uint32_t i = 0; i < engine.entities.size(); i++){
         Entity* entity = engine.entities.at(i);
         SDL_Rect pSrc;
-        pSrc.x = pSrc.y = 192;
+        pSrc.x = pSrc.y = 0;
         pSrc.w = TILE_WIDTH;
         pSrc.h = TILE_HEIGHT;
 
         SDL_Rect pDest;
-        pDest.x = TILE_WIDTH_HALF*entity->x - (entity->y*TILE_WIDTH_HALF) + offsetX;
-        pDest.y = entity->y*TILE_HEIGHT_HALF + entity->x*TILE_HEIGHT_HALF + offsetY;
+        pDest.x = entity->x + offsetX;
+        pDest.y = entity->y + offsetY;
         pDest.w = TILE_WIDTH;
         pDest.h = TILE_HEIGHT;
-        SDL_RenderCopy(sdlRenderer, tilesTexture, &pSrc, &pDest);
+        SDL_RenderCopy(sdlRenderer, spritesTexture, &pSrc, &pDest);
     }
 
     char updatesString[20];
@@ -261,12 +262,6 @@ void Game::draw(){
     Drawer::instance()->drawText(updatesString, 1, 1); 
     sprintf(updatesString, "UPS: %d", updateCounter);
     Drawer::instance()->drawText(updatesString, 1, 14); 
-
-    if(debug){
-        char mousePos[20];
-        sprintf(mousePos, "%d,%d -> %d,%d", Controls::instance()->mouseX, Controls::instance()->mouseY, tileX, tileY);
-        Drawer::instance()->drawText(mousePos, 1, 28);
-    }
 
     SDL_RenderPresent(sdlRenderer);
     SDL_Delay(1); 

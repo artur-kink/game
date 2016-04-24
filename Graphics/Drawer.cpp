@@ -15,7 +15,7 @@ Drawer* Drawer::instance(){
 uint32_t Drawer::init(SDL_Renderer* renderer){
     sdlRenderer = renderer;
 
-    font = TTF_OpenFont("04B03.ttf", 16);
+    font = TTF_OpenFont("04B03.ttf", 12);
     if(font == NULL){
         std::cout << "TTF_OpenFont: " << SDL_GetError() << std::endl;
         return 1;

@@ -2,6 +2,7 @@
 #define _ENTITY_HPP
 
 #include <cstdint>
+#include "glog/logging.h"
 
 class Entity{
 protected:
@@ -13,11 +14,7 @@ public:
     Entity();
     Entity(int32_t sX, int32_t sY);
     
-    void update();
-
-    /** Force entity to perform its turn. */
-    virtual void turn() = 0;
-
+    virtual void update();
 };
 
 #endif
