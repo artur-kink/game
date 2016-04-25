@@ -15,6 +15,8 @@ public:
     Tile** map;
 
     Map(uint32_t w, uint32_t h);
+    Tile& getTile(uint32_t x, uint32_t y);
+    Tile& getPointTile(uint32_t x, uint32_t y);
 };
 
 #endif

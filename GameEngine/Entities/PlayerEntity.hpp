@@ -3,6 +3,8 @@
 
 #include "Entity.hpp"
 #include "../GameEngine.hpp"
+#include "../../GameTime.hpp"
+#include "../../Graphics/Drawer.hpp"
 
 class PlayerEntity:public Entity{
 public:
@@ -14,15 +16,21 @@ public:
         Right = 8
     };
 
+    Timer animationTimer;
+    uint8_t animationFrame;
+
     uint8_t direction;
+    uint8_t movingDirection;
 
     uint32_t width;
     uint32_t height;
 
     PlayerEntity();
     virtual void update();
+    virtual void draw();
 
     void setMoveDirection(uint8_t dir);
+    void performAction();
 };
 
 #endif

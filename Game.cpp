@@ -8,7 +8,7 @@ Game::Game(){
     offsetX = 350;
     offsetY = 0;
 
-    debug = true;
+    debug = false;
 
     //Enable glog logging
     FLAGS_log_dir = ".";
@@ -49,20 +49,6 @@ uint32_t Game::init(){
         return 3;
     }
 
-    LOG(INFO) << "Loading Textures\n";
-    tilesTexture = IMG_LoadTexture(sdlRenderer, "tiles.png");
-    if (tilesTexture == NULL){
-        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
-        return 4;
-    }
-
-    spritesTexture = IMG_LoadTexture(sdlRenderer, "sprites.png");
-    if (spritesTexture == NULL){
-        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
-        return 4;
-    }
-    LOG(INFO) << "Textures Loaded\n";
-
     LOG(INFO) << "Initializing TTF\n";
     if(TTF_Init()){
         LOG(ERROR) << "TTF_Init: " << SDL_GetError() << "\n";
@@ -83,9 +69,6 @@ void Game::cleanup(){
     Drawer::instance()->cleanup();
 
     LOG(INFO) << "Cleaning up\n";
-    if(tilesTexture){
-        SDL_DestroyTexture(tilesTexture);
-    }
 
     if(sdlRenderer){
         SDL_DestroyRenderer(sdlRenderer);
@@ -206,7 +189,11 @@ void Game::update(){
         }
         
         ((PlayerEntity*)player)->setMoveDirection(direction);
-    }   
+    }
+
+    if(keys[SDL_SCANCODE_SPACE]){
+        ((PlayerEntity*)player)->performAction();
+    }
 
     if(keys[SDL_SCANCODE_TAB])
         debug = !debug;
@@ -217,44 +204,26 @@ void Game::update(){
 void Game::draw(){
     SDL_RenderClear(sdlRenderer);
 
-    for(uint32_t y = 0; y < 12; y++){
-        for(uint32_t x = 0; x < 12; x++){
-            Tile& tile =  engine.world.getTile(x, y);
-            SDL_Rect src;
-            src.x = (tile.layers[0]%30)*32;
-            src.y = (tile.layers[0]/30)*32;
-            src.w = TILE_WIDTH;
-            src.h = TILE_HEIGHT;
-
-            SDL_Rect dest;
-            dest.x = TILE_WIDTH*x + offsetX;
-            dest.y = TILE_HEIGHT*y + offsetY;
-            dest.w = TILE_WIDTH;
-            dest.h = TILE_HEIGHT;
-            SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);
+    for(uint32_t y = 0; y < engine.map->height; y++){
+        for(uint32_t x = 0; x < engine.map->width; x++){
+            Tile& tile =  engine.map->getTile(x, y);
+            int32_t drawX = TILE_WIDTH*x + offsetX;
+            int32_t drawY = TILE_HEIGHT*y + offsetY;
+            Drawer::instance()->drawTile(tile.layers[0], drawX, drawY);
 
             if(debug){
                 char coords[20];
                 sprintf(coords, "(%d,%d)", x,y);
-                Drawer::instance()->drawText(coords, dest.x+8, dest.y+6); 
+                Drawer::instance()->drawText(coords, drawX+8, drawY+6); 
             }
         }
     }
 
     //Draw Entities
+    Drawer::instance()->setOffset(offsetX, offsetY);
     for(uint32_t i = 0; i < engine.entities.size(); i++){
         Entity* entity = engine.entities.at(i);
-        SDL_Rect pSrc;
-        pSrc.x = pSrc.y = 0;
-        pSrc.w = TILE_WIDTH;
-        pSrc.h = TILE_HEIGHT;
-
-        SDL_Rect pDest;
-        pDest.x = entity->x + offsetX;
-        pDest.y = entity->y + offsetY;
-        pDest.w = TILE_WIDTH;
-        pDest.h = TILE_HEIGHT;
-        SDL_RenderCopy(sdlRenderer, spritesTexture, &pSrc, &pDest);
+        entity->draw();
     }
 
     char updatesString[20];

@@ -1,8 +1,9 @@
 #ifndef _GAMEENGINE_HPP
 #define _GAMEENGINE_HPP
 
-#include "World.hpp"
+#include "Map.hpp"
 #include "Entities/Entities.hpp"
+#include "../GameTime.hpp"
 
 #include <vector>
 
@@ -17,7 +18,7 @@ protected:
 public:
     std::vector<Entity*> entities;
 
-    World world;
+    Map *map;
 
     GameEngine();
 

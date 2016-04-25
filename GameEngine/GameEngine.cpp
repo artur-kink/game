@@ -4,6 +4,7 @@ GameEngine* GameEngine::gameEngine = NULL;
 
 GameEngine::GameEngine(){
     gameEngine = this;
+    map = new Map(50, 50);
 }
 
 GameEngine* GameEngine::instance(){
