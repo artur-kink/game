@@ -16,24 +16,24 @@ uint32_t Drawer::init(SDL_Renderer* renderer){
     sdlRenderer = renderer;
 
     LOG(INFO) << "Loading Textures\n";
-    tilesTexture = IMG_LoadTexture(sdlRenderer, "tiles.png");
+    tilesTexture = loadTexture("tiles.png");
     if (tilesTexture == NULL){
-        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
         return 1;
     }
 
-    spritesTexture = IMG_LoadTexture(sdlRenderer, "sprites.png");
+    spritesTexture = loadTexture("sprites.png");
     if (spritesTexture == NULL){
-        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
         return 1;
     }
     LOG(INFO) << "Textures Loaded\n";
 
     font = TTF_OpenFont("04B03.ttf", 12);
     if(font == NULL){
-        std::cout << "TTF_OpenFont: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "TTF_OpenFont: " << SDL_GetError() << "\n";
         return 2;
     }
+
+    loadSprites();
     return 0;
 }
 
@@ -95,6 +95,75 @@ void Drawer::drawSprite(uint32_t sprite, int32_t x, int32_t y){
     pDest.w = 40;
     pDest.h = 40;
     SDL_RenderCopy(sdlRenderer, spritesTexture, &pSrc, &pDest);
+}
+
+SDL_Texture* Drawer::loadTexture(const char* fileName){
+    SDL_Texture* texture = IMG_LoadTexture(sdlRenderer, fileName);
+    if (texture == NULL){
+        LOG(ERROR) << "IMG_LoadTexture: " << SDL_GetError() << "\n";
+        return NULL;
+    }
+    return texture;
+}
+
+SDL_Texture* Drawer::getSpriteTexture(const char* textureName){
+    for(uint32_t i = 0; i < spriteTextureNames.size(); i++){
+        if(strcmp(textureName, spriteTextureNames[i]) == 0)
+            return spriteTextures[i];
+    }
+    return NULL;
+}
+
+void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
+    if(node == NULL)
+        return;
+
+    for(xmlNodePtr curNode = node->children; curNode; curNode = curNode->next) {
+        if(strcmp((const char*)curNode->name, "set") == 0){
+            LOG(INFO) << "Set\n";
+            SpriteSet *set = new SpriteSet();
+            if(currentSet != NULL)
+                currentSet->sprites.push_back(set);
+            parseSprite(curNode, set);
+        }else if(strcmp((const char*)curNode->name, "sprite") == 0){
+            Sprite* sprite = new Sprite();
+            if(currentSet != NULL)
+                currentSet->sprites.push_back(sprite);
+            LOG(INFO) << "Sprite\n";
+            xmlChar* fileName = xmlGetProp(curNode, (const xmlChar*)"file");
+            LOG(INFO) << "FileName: " << fileName << "\n";
+            SDL_Texture* texture = getSpriteTexture((const char*)fileName);
+            if(texture == NULL){
+                texture = loadTexture((const char*)fileName);
+                if(texture == NULL){
+                    LOG(ERROR) << "Failed to load sprite texture " << fileName << "\n";
+                }
+                spriteTextures.push_back(texture);
+                char *textureName = (char*)malloc(strlen((char*)fileName)+1);
+                strcpy((char*)fileName, textureName);
+                spriteTextureNames.push_back(textureName);
+            }
+        }
+    }
+}
+
+void Drawer::loadSprites(){
+    // Init libxml2
+    LIBXML_TEST_VERSION
+    
+    xmlDocPtr doc = xmlReadFile("sprites.xml", NULL, 0);
+
+    if(doc == NULL){
+        LOG(ERROR) << "Failed to parse sprites.xml\n";
+    }
+
+    xmlNodePtr rootNode = xmlDocGetRootElement(doc);
+    LOG(INFO) << "Root Node: " << rootNode->name << "\n";
+    parseSprite(rootNode, NULL);
+
+    xmlFreeDoc(doc);
+    // Xml cleanup
+    xmlCleanupParser();
 }
 
 void Drawer::cleanup(){

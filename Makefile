@@ -2,9 +2,9 @@
 #Compiler
 CC=g++
 
-INCLUDES=-I../gameenginetools/
+INCLUDES=-I../gameenginetools/ -I/usr/include/libxml2/
 CFLAGS=-c -g -Wall -std=c++11 $(INCLUDES) -MMD -MP -MF 
-LFLAGS=-Wall -g -lSDL2 -lSDL2_image -lSDL2_ttf -lglog
+LFLAGS=-Wall -g -lSDL2 -lSDL2_image -lSDL2_ttf -lxml2 -lglog
 
 TOOLSOURCES=../gameenginetools/Time/Timer.cpp \
 			../gameenginetools/Time/CarryTimer.cpp
