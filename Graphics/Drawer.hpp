@@ -46,6 +46,7 @@ public:
 
     SDL_Texture* loadTexture(const char* fileName);
     SDL_Texture* getSpriteTexture(const char* textureName);
+    SpriteBase* getSprite(const char* name);
     void parseSprite(xmlNodePtr node, SpriteSet *currentSet);
     void loadSprites();
     

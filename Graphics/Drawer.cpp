@@ -114,6 +114,14 @@ SDL_Texture* Drawer::getSpriteTexture(const char* textureName){
     return NULL;
 }
 
+SpriteBase* Drawer::getSprite(const char* name){
+    for(uint32_t i = 0; i < sprites.size(); i++){
+        if(sprites[i]->name && strcmp(sprites[i]->name, name) == 0)
+            return sprites[i];
+    }
+    return NULL;
+}
+
 void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
     if(node == NULL)
         return;
@@ -121,15 +129,34 @@ void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
     for(xmlNodePtr curNode = node->children; curNode; curNode = curNode->next) {
         if(strcmp((const char*)curNode->name, "set") == 0){
             LOG(INFO) << "Set\n";
-            SpriteSet *set = new SpriteSet();
+            SpriteSet* set = new SpriteSet();
+
+            xmlChar *name = xmlGetProp(curNode, (const xmlChar*)"name");
+            if(name != NULL){
+                set->name = (char*)malloc(strlen((char*)name)+1);
+                strcpy((char*)name, set->name);
+            }
+    
             if(currentSet != NULL)
                 currentSet->sprites.push_back(set);
+            else
+                sprites.push_back(set);
+
             parseSprite(curNode, set);
         }else if(strcmp((const char*)curNode->name, "sprite") == 0){
             Sprite* sprite = new Sprite();
             if(currentSet != NULL)
                 currentSet->sprites.push_back(sprite);
+            else
+                sprites.push_back(sprite);
             LOG(INFO) << "Sprite\n";
+
+            xmlChar *name = xmlGetProp(curNode, (const xmlChar*)"name");
+            if(name != NULL){
+                sprite->name = (char*)malloc(strlen((char*)name)+1);
+                strcpy((char*)name, sprite->name);
+            }
+
             xmlChar* fileName = xmlGetProp(curNode, (const xmlChar*)"file");
             LOG(INFO) << "FileName: " << fileName << "\n";
             SDL_Texture* texture = getSpriteTexture((const char*)fileName);
@@ -142,6 +169,7 @@ void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
                 char *textureName = (char*)malloc(strlen((char*)fileName)+1);
                 strcpy((char*)fileName, textureName);
                 spriteTextureNames.push_back(textureName);
+                sprite->texture = texture;
             }
         }
     }
