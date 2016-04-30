@@ -23,6 +23,8 @@ private:
     static Drawer* drawer;
     SDL_Renderer* sdlRenderer;
 
+    SDL_Texture* drawTexture;
+
     SDL_Texture* tilesTexture;
     SDL_Texture* spritesTexture;
     TTF_Font* font;
@@ -39,10 +41,13 @@ public:
 
     uint32_t init(SDL_Renderer* renderer);
 
+    void startDraw();
     void setOffset(int32_t x, int32_t y);
     void drawSprite(uint32_t sprite, int32_t x, int32_t y);
+    void drawSprite(Sprite* sprite, int32_t x, int32_t y);
     void drawTile(uint32_t tile, int32_t x, int32_t y);
     void drawText(const char* text, int32_t x, int32_t y);
+    void finishDraw();
 
     SDL_Texture* loadTexture(const char* fileName);
     SDL_Texture* getSpriteTexture(const char* textureName);

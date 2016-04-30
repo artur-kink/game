@@ -6,7 +6,7 @@
 
 class SpriteBase{
 public:
-    const char* name;
+    char* name;
 };
 
 class Sprite : public SpriteBase{
@@ -18,6 +18,14 @@ public:
 class SpriteSet : public SpriteBase{
 public:
     std::vector<SpriteBase*> sprites;
+
+    SpriteBase* getSprite(const char* name){
+        for(uint32_t i = 0; i < sprites.size(); i++){
+            if(sprites[i]->name && strcmp(name, sprites[i]->name) == 0)
+                return sprites[i];
+        }
+        return NULL;
+    }
 };
 
 #endif

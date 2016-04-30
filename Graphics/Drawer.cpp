@@ -15,6 +15,14 @@ Drawer* Drawer::instance(){
 uint32_t Drawer::init(SDL_Renderer* renderer){
     sdlRenderer = renderer;
 
+    LOG(INFO) << "Create draw texture\n";
+    drawTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 562, 384);
+    if(drawTexture == NULL){
+        return 1;
+    }
+
+    LOG(INFO) << "Surface created\n";
+
     LOG(INFO) << "Loading Textures\n";
     tilesTexture = loadTexture("tiles.png");
     if (tilesTexture == NULL){
@@ -40,6 +48,29 @@ uint32_t Drawer::init(SDL_Renderer* renderer){
 void Drawer::setOffset(int32_t x, int32_t y){
     offsetX = x;
     offsetY = y;
+}
+
+void Drawer::startDraw(){
+    SDL_RenderClear(sdlRenderer);
+    SDL_SetRenderTarget(sdlRenderer, drawTexture);
+}
+
+void Drawer::finishDraw(){
+    SDL_Rect src;
+    src.x = 0;
+    src.y = 0;
+    src.w = 512;
+    src.h = 384;
+
+    SDL_Rect dest;
+    dest.x = 0;
+    dest.y = 0;
+    dest.w = 1024;
+    dest.h = 768;
+    
+    SDL_SetRenderTarget(sdlRenderer, NULL);
+    SDL_RenderCopy(sdlRenderer, drawTexture, &src, &dest);
+    SDL_RenderPresent(sdlRenderer);
 }
 
 void Drawer::drawText(const char* text, int32_t x, int32_t y){
@@ -97,6 +128,16 @@ void Drawer::drawSprite(uint32_t sprite, int32_t x, int32_t y){
     SDL_RenderCopy(sdlRenderer, spritesTexture, &pSrc, &pDest);
 }
 
+void Drawer::drawSprite(Sprite* sprite, int32_t x, int32_t y){
+    
+    SDL_Rect pDest;
+    pDest.x = x+offsetX;
+    pDest.y = y+offsetY;
+    pDest.w = sprite->rect.w;
+    pDest.h = sprite->rect.h;
+    SDL_RenderCopy(sdlRenderer, spritesTexture, &sprite->rect, &pDest);
+}
+
 SDL_Texture* Drawer::loadTexture(const char* fileName){
     SDL_Texture* texture = IMG_LoadTexture(sdlRenderer, fileName);
     if (texture == NULL){
@@ -134,7 +175,7 @@ void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
             xmlChar *name = xmlGetProp(curNode, (const xmlChar*)"name");
             if(name != NULL){
                 set->name = (char*)malloc(strlen((char*)name)+1);
-                strcpy((char*)name, set->name);
+                strcpy(set->name, (char*)name);
             }
     
             if(currentSet != NULL)
@@ -154,7 +195,7 @@ void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
             xmlChar *name = xmlGetProp(curNode, (const xmlChar*)"name");
             if(name != NULL){
                 sprite->name = (char*)malloc(strlen((char*)name)+1);
-                strcpy((char*)name, sprite->name);
+                strcpy(sprite->name, (char*)name);
             }
 
             xmlChar* fileName = xmlGetProp(curNode, (const xmlChar*)"file");
@@ -167,10 +208,23 @@ void Drawer::parseSprite(xmlNodePtr node, SpriteSet* currentSet){
                 }
                 spriteTextures.push_back(texture);
                 char *textureName = (char*)malloc(strlen((char*)fileName)+1);
-                strcpy((char*)fileName, textureName);
+                strcpy(textureName, (char*)fileName);
                 spriteTextureNames.push_back(textureName);
                 sprite->texture = texture;
             }
+
+            xmlChar* xPos = xmlGetProp(curNode, (const xmlChar*)"x");
+            xmlChar* yPos = xmlGetProp(curNode, (const xmlChar*)"y");
+            xmlChar* width = xmlGetProp(curNode, (const xmlChar*)"w");
+            xmlChar* height = xmlGetProp(curNode, (const xmlChar*)"h");
+            if(xPos == NULL || yPos == NULL || width == NULL || height == NULL)
+                LOG(ERROR) << "Expected sprite property missing\n";
+
+            sprite->rect.x = atoi((const char*)xPos);
+            sprite->rect.y = atoi((const char*)yPos);
+            sprite->rect.w = atoi((const char*)width);
+            sprite->rect.h = atoi((const char*)height);
+            LOG(INFO) << "Rect: " << sprite->rect.x << "," << sprite->rect.y << " " << sprite->rect.w << "x" << sprite->rect.h << "\n";
         }
     }
 }

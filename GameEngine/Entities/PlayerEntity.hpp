@@ -19,6 +19,9 @@ public:
     Timer animationTimer;
     uint8_t animationFrame;
 
+    bool inAction;
+    Timer actionTimer;
+
     uint8_t direction;
     uint8_t movingDirection;
 

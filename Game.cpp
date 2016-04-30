@@ -202,7 +202,8 @@ void Game::update(){
 }
 
 void Game::draw(){
-    SDL_RenderClear(sdlRenderer);
+
+    Drawer::instance()->startDraw();
 
     for(uint32_t y = 0; y < engine.map->height; y++){
         for(uint32_t x = 0; x < engine.map->width; x++){
@@ -232,6 +233,6 @@ void Game::draw(){
     sprintf(updatesString, "UPS: %d", updateCounter);
     Drawer::instance()->drawText(updatesString, 1, 14); 
 
-    SDL_RenderPresent(sdlRenderer);
+    Drawer::instance()->finishDraw();
     SDL_Delay(1); 
 }

@@ -1,6 +1,10 @@
 #include "PlayerEntity.hpp"
 
-PlayerEntity::PlayerEntity():Entity(0, 0),animationTimer(*GameTime::instance()){
+PlayerEntity::PlayerEntity():Entity(0, 0),
+    animationTimer(*GameTime::instance()),
+    animationFrame(0),
+    inAction(false),
+    actionTimer(*GameTime::instance()){
     width = 24;
     height = 24;
     direction = MoveDirection::Down;
@@ -32,6 +36,14 @@ void PlayerEntity::update(){
             }
         }
     }
+
+    if(inAction && actionTimer.hasElapsed(600)){
+        inAction = false;
+        if(GameEngine::instance()->map->getPointTile(x, y).isArable()){
+            GameEngine::instance()->map->getPointTile(x, y).setPlowed();
+        }
+    }
+
 }
 
 void PlayerEntity::setMoveDirection(uint8_t dir){
@@ -45,14 +57,16 @@ void PlayerEntity::setMoveDirection(uint8_t dir){
 }
 
 void PlayerEntity::performAction(){
-    if(GameEngine::instance()->map->getPointTile(x, y).isArable()){
-        GameEngine::instance()->map->getPointTile(x, y).setPlowed();
-    }
+    inAction = true;
+    animationTimer.reset();
+    animationFrame = 0;
+    actionTimer.reset();
 }
 
 void PlayerEntity::draw(){
 
-    if(movingDirection != MoveDirection::None){
+    SpriteSet* characterSet = static_cast<SpriteSet*>(Drawer::instance()->getSprite("character"));
+    if(movingDirection != MoveDirection::None || inAction){
         if(animationTimer.hasElapsed(200)){
             animationTimer.reset();
             animationFrame++;
@@ -61,10 +75,18 @@ void PlayerEntity::draw(){
         }
     }
 
-    if(direction & MoveDirection::Up)
-        Drawer::instance()->drawSprite(2 + animationFrame*10, x, y);
-    else if(direction & MoveDirection::Left || direction & MoveDirection::Right)
-        Drawer::instance()->drawSprite(1 + animationFrame*10, x, y);
-    else if(direction & MoveDirection::Down)
-        Drawer::instance()->drawSprite(0 + animationFrame*10, x, y);
+
+    SpriteSet* drawSet = NULL;
+    if(inAction){
+        drawSet = static_cast<SpriteSet*>(characterSet->getSprite("action_down"));
+    }else{
+        SpriteSet* walkSet = NULL;
+        if(direction & MoveDirection::Up)
+            drawSet = (SpriteSet*)characterSet->getSprite("walk_up");
+        else if(direction & MoveDirection::Left || direction & MoveDirection::Right)
+            drawSet = (SpriteSet*)characterSet->getSprite("walk_left");
+        else if(direction & MoveDirection::Down)
+            drawSet = (SpriteSet*)characterSet->getSprite("walk_down");
+    }
+    Drawer::instance()->drawSprite(static_cast<Sprite*>(drawSet->sprites[animationFrame]), x, y);
 }
