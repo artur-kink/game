@@ -51,7 +51,7 @@ void Drawer::setOffset(int32_t x, int32_t y){
 }
 
 void Drawer::startDraw(){
-    SDL_RenderClear(sdlRenderer);
+    //SDL_RenderClear(sdlRenderer);
     SDL_SetRenderTarget(sdlRenderer, drawTexture);
 }
 
@@ -106,8 +106,8 @@ void Drawer::drawTile(uint32_t tile, int32_t x, int32_t y){
     src.h = TILE_HEIGHT;
 
     SDL_Rect dest;
-    dest.x = x;
-    dest.y = y;
+    dest.x = x+offsetX;
+    dest.y = y+offsetY;
     dest.w = TILE_WIDTH;
     dest.h = TILE_HEIGHT;
     SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);

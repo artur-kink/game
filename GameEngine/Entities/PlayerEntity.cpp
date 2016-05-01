@@ -78,9 +78,13 @@ void PlayerEntity::draw(){
 
     SpriteSet* drawSet = NULL;
     if(inAction){
-        drawSet = static_cast<SpriteSet*>(characterSet->getSprite("action_down"));
+        if(direction & MoveDirection::Up)
+            drawSet = (SpriteSet*)characterSet->getSprite("action_up");
+        else if(direction & MoveDirection::Left || direction & MoveDirection::Right)
+            drawSet = (SpriteSet*)characterSet->getSprite("action_left");
+        else if(direction & MoveDirection::Down)
+            drawSet = (SpriteSet*)characterSet->getSprite("action_down");
     }else{
-        SpriteSet* walkSet = NULL;
         if(direction & MoveDirection::Up)
             drawSet = (SpriteSet*)characterSet->getSprite("walk_up");
         else if(direction & MoveDirection::Left || direction & MoveDirection::Right)

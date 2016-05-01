@@ -205,11 +205,36 @@ void Game::draw(){
 
     Drawer::instance()->startDraw();
 
-    for(uint32_t y = 0; y < engine.map->height; y++){
-        for(uint32_t x = 0; x < engine.map->width; x++){
+    int32_t startX = player->x - 512/2;
+    int32_t startY = player->y - 384/2;
+
+    if(startX < 0)
+        startX = 0;
+    if(startY < 0)
+        startY = 0;
+
+    if(startX > engine.map->width*TILE_WIDTH - 512)
+        startX = engine.map->width*TILE_WIDTH - 512;
+    if(startY > engine.map->height*TILE_HEIGHT - 384)
+        startY = engine.map->height*TILE_HEIGHT - 384;
+
+    Drawer::instance()->setOffset(-startX, -startY);
+
+    uint32_t tileStartX = startX/TILE_WIDTH;
+    uint32_t tileStartY = startY/TILE_WIDTH;
+    uint32_t tileEndX = tileStartX + 512/TILE_WIDTH + 1;
+    uint32_t tileEndY = tileStartY + 384/TILE_HEIGHT + 1;
+
+    if(tileEndX > engine.map->width)
+        tileEndX = engine.map->width;
+    if(tileEndY > engine.map->height)
+        tileEndY = engine.map->height;
+
+    for(uint32_t y = tileStartY; y < tileEndY; y++){
+        for(uint32_t x = tileStartX; x < tileEndX; x++){
             Tile& tile =  engine.map->getTile(x, y);
-            int32_t drawX = TILE_WIDTH*x + offsetX;
-            int32_t drawY = TILE_HEIGHT*y + offsetY;
+            int32_t drawX = TILE_WIDTH*x;
+            int32_t drawY = TILE_HEIGHT*y;
             Drawer::instance()->drawTile(tile.layers[0], drawX, drawY);
 
             if(debug){
@@ -221,7 +246,6 @@ void Game::draw(){
     }
 
     //Draw Entities
-    Drawer::instance()->setOffset(offsetX, offsetY);
     for(uint32_t i = 0; i < engine.entities.size(); i++){
         Entity* entity = engine.entities.at(i);
         entity->draw();
