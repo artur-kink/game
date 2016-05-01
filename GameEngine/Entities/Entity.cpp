@@ -1,12 +1,12 @@
 #include "Entity.hpp"
 
 Entity::Entity(){
-    x = y = 0;
+    position = glm::vec2(0.0f);
 }
 
 Entity::Entity(int32_t sX, int32_t sY){
-    x = sX;
-    y = sY;
+    position.x = sX;
+    position.y = sY;
 }
 
 void Entity::update(){

@@ -6,6 +6,8 @@
 #include "../../GameTime.hpp"
 #include "../../Graphics/Drawer.hpp"
 
+#include <glm/vec2.hpp>
+
 class PlayerEntity:public Entity{
 public:
     enum MoveDirection{
@@ -23,7 +25,8 @@ public:
     Timer actionTimer;
 
     uint8_t direction;
-    uint8_t movingDirection;
+
+    glm::vec2 movingDirection;
 
     uint32_t width;
     uint32_t height;
@@ -32,7 +35,7 @@ public:
     virtual void update();
     virtual void draw();
 
-    void setMoveDirection(uint8_t dir);
+    void setMoveDirection(glm::vec2 dir);
     void performAction();
 };
 

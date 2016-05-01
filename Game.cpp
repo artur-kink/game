@@ -175,17 +175,17 @@ void Game::update(){
             offsetX+=5;
         }
     }else{
-        uint8_t direction = 0;
+        glm::vec2 direction(0.0f, 0.0f);
         if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]){
-            direction = PlayerEntity::Up;
+            direction.y = -1.0f;
         }else if(keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S]){
-            direction = PlayerEntity::Down;
+            direction.y = 1.0f;
         }
 
         if(keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]){
-            direction |= PlayerEntity::Left;
+            direction.x = -1.0f;
         }else if(keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]){
-            direction |= PlayerEntity::Right;
+            direction.x = 1.0f;
         }
         
         ((PlayerEntity*)player)->setMoveDirection(direction);
@@ -205,37 +205,44 @@ void Game::draw(){
 
     Drawer::instance()->startDraw();
 
-    int32_t startX = player->x - 512/2;
-    int32_t startY = player->y - 384/2;
+    int32_t startX = player->position.x - 512/2 + 16;
+    int32_t startY = player->position.y - 384/2 + 16;
 
     if(startX < 0)
         startX = 0;
     if(startY < 0)
         startY = 0;
 
-    if(startX > engine.map->width*TILE_WIDTH - 512)
-        startX = engine.map->width*TILE_WIDTH - 512;
-    if(startY > engine.map->height*TILE_HEIGHT - 384)
-        startY = engine.map->height*TILE_HEIGHT - 384;
+    if(startX > engine.map->width*TILE_SIZE - 512)
+        startX = engine.map->width*TILE_SIZE - 512;
+    if(startY > engine.map->height*TILE_SIZE - 384)
+        startY = engine.map->height*TILE_SIZE - 384;
 
     Drawer::instance()->setOffset(-startX, -startY);
 
-    uint32_t tileStartX = startX/TILE_WIDTH;
-    uint32_t tileStartY = startY/TILE_WIDTH;
-    uint32_t tileEndX = tileStartX + 512/TILE_WIDTH + 1;
-    uint32_t tileEndY = tileStartY + 384/TILE_HEIGHT + 1;
+    uint32_t tileStartX = startX/TILE_SIZE;
+    uint32_t tileStartY = startY/TILE_SIZE;
+    uint32_t tileEndX = tileStartX + 512/TILE_SIZE + 1;
+    uint32_t tileEndY = tileStartY + 384/TILE_SIZE + 1;
 
     if(tileEndX > engine.map->width)
         tileEndX = engine.map->width;
     if(tileEndY > engine.map->height)
         tileEndY = engine.map->height;
 
+    int mouseTileX = (Controls::instance()->mouseX / 2 + startX) / TILE_SIZE;
+    int mouseTileY = (Controls::instance()->mouseY / 2 + startY) / TILE_SIZE;
+
     for(uint32_t y = tileStartY; y < tileEndY; y++){
         for(uint32_t x = tileStartX; x < tileEndX; x++){
             Tile& tile =  engine.map->getTile(x, y);
-            int32_t drawX = TILE_WIDTH*x;
-            int32_t drawY = TILE_HEIGHT*y;
-            Drawer::instance()->drawTile(tile.layers[0], drawX, drawY);
+            int32_t drawX = TILE_SIZE*x;
+            int32_t drawY = TILE_SIZE*y;
+
+            if(mouseTileY == y && mouseTileX == x){
+                Drawer::instance()->drawTile(0, drawX, drawY);
+            }else
+                Drawer::instance()->drawTile(tile.layers[0], drawX, drawY);
 
             if(debug){
                 char coords[20];

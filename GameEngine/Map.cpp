@@ -27,5 +27,5 @@ Tile& Map::getTile(uint32_t x, uint32_t y){
 }
 
 Tile& Map::getPointTile(uint32_t x, uint32_t y){
-    return getTile(x/TILE_WIDTH, y/TILE_HEIGHT);
+    return getTile(x/TILE_SIZE, y/TILE_SIZE);
 }

@@ -11,45 +11,55 @@ PlayerEntity::PlayerEntity():Entity(0, 0),
 }
 
 void PlayerEntity::update(){
-    if(movingDirection != MoveDirection::None){
-        if(movingDirection & MoveDirection::Up){
-            if(y-1 >= 0 && !GameEngine::instance()->map->getPointTile(x, (y-1)).isBlocked() &&
-               !GameEngine::instance()->map->getPointTile((x+width), (y-1)).isBlocked()){
-                y--;
+
+    if(movingDirection != glm::vec2(0.0f)){
+        if(movingDirection.y == -1.0f){
+            if(position.y-1 >= 0 && !GameEngine::instance()->map->getPointTile(position.x, (position.y-1)).isBlocked() &&
+               !GameEngine::instance()->map->getPointTile((position.x+width), (position.y-1)).isBlocked()){
+                position.y--;
             }
-        }else if(movingDirection & MoveDirection::Down){
-            if(y+1 < GameEngine::instance()->map->height*TILE_WIDTH && !GameEngine::instance()->map->getPointTile(x, (y+1+height)).isBlocked() &&
-               !GameEngine::instance()->map->getPointTile((x+width), (y+1+height)).isBlocked()){
-                y++;
+        }else if(movingDirection.y == 1.0f){
+            if(position.y+1 < GameEngine::instance()->map->height*TILE_SIZE && !GameEngine::instance()->map->getPointTile(position.x, (position.y+1+height)).isBlocked() &&
+               !GameEngine::instance()->map->getPointTile((position.x+width), (position.y+1+height)).isBlocked()){
+                position.y++;
             }
         }
 
-        if(movingDirection & MoveDirection::Left){
-            if(x-1 >= 0 && !GameEngine::instance()->map->getPointTile((x-1),y).isBlocked() &&
-               !GameEngine::instance()->map->getPointTile((x-1), (y+height)).isBlocked()){
-                x--;
+        if(movingDirection.x == -1.0f){
+            if(position.x-1 >= 0 && !GameEngine::instance()->map->getPointTile((position.x-1),position.y).isBlocked() &&
+               !GameEngine::instance()->map->getPointTile((position.x-1), (position.y+height)).isBlocked()){
+                position.x--;
             }
-        }else if(movingDirection & MoveDirection::Right){
-            if(x+1 < GameEngine::instance()->map->width*TILE_HEIGHT && !GameEngine::instance()->map->getPointTile((x+1+width),y).isBlocked() &&
-               !GameEngine::instance()->map->getPointTile((x+1+width), (y+height)).isBlocked()){
-                x++;
+        }else if(movingDirection.x == 1.0f){
+            if(position.x+1 < GameEngine::instance()->map->width*TILE_SIZE && !GameEngine::instance()->map->getPointTile((position.x+1+width),position.y).isBlocked() &&
+               !GameEngine::instance()->map->getPointTile((position.x+1+width), (position.y+height)).isBlocked()){
+                position.x++;
             }
         }
     }
 
     if(inAction && actionTimer.hasElapsed(600)){
         inAction = false;
-        if(GameEngine::instance()->map->getPointTile(x, y).isArable()){
-            GameEngine::instance()->map->getPointTile(x, y).setPlowed();
+        if(GameEngine::instance()->map->getPointTile(position.x, position.y).isArable()){
+            GameEngine::instance()->map->getPointTile(position.x, position.y).setPlowed();
         }
     }
 
 }
 
-void PlayerEntity::setMoveDirection(uint8_t dir){
-    if(dir != None)
-        direction = dir;
-    if (movingDirection != dir){
+void PlayerEntity::setMoveDirection(glm::vec2 dir){
+    if(dir != glm::vec2(0.0f)){
+        if(dir.x == -1.0f)
+            direction = MoveDirection::Left;
+        else if(dir.x == 1.0f)
+            direction = MoveDirection::Right;
+        else if(dir.y == -1.0f)
+            direction = MoveDirection::Up;
+        else if(dir.y == 1.0f)
+            direction = MoveDirection::Down;
+    }
+
+    if (inAction == false && movingDirection != dir){
         movingDirection = dir;
         animationFrame = 0;
         animationTimer.reset();
@@ -57,6 +67,7 @@ void PlayerEntity::setMoveDirection(uint8_t dir){
 }
 
 void PlayerEntity::performAction(){
+    setMoveDirection(glm::vec2(0.0f, 0.0f));
     inAction = true;
     animationTimer.reset();
     animationFrame = 0;
@@ -66,7 +77,7 @@ void PlayerEntity::performAction(){
 void PlayerEntity::draw(){
 
     SpriteSet* characterSet = static_cast<SpriteSet*>(Drawer::instance()->getSprite("character"));
-    if(movingDirection != MoveDirection::None || inAction){
+    if(movingDirection != glm::vec2(0.0f) || inAction){
         if(animationTimer.hasElapsed(200)){
             animationTimer.reset();
             animationFrame++;
@@ -74,7 +85,6 @@ void PlayerEntity::draw(){
                 animationFrame = 0;
         }
     }
-
 
     SpriteSet* drawSet = NULL;
     if(inAction){
@@ -92,5 +102,5 @@ void PlayerEntity::draw(){
         else if(direction & MoveDirection::Down)
             drawSet = (SpriteSet*)characterSet->getSprite("walk_down");
     }
-    Drawer::instance()->drawSprite(static_cast<Sprite*>(drawSet->sprites[animationFrame]), x, y);
+    Drawer::instance()->drawSprite(static_cast<Sprite*>(drawSet->sprites[animationFrame]), position.x, position.y);
 }

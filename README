@@ -1,4 +1,6 @@
 Required Libraries:
 SDL2
 glog
+glm
+libxml2
 gameenginetools https://github.com/artur-kink/gameenginetools

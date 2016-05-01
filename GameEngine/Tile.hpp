@@ -3,8 +3,7 @@
 
 #include <cstdint>
 
-#define TILE_WIDTH 32
-#define TILE_HEIGHT 32
+#define TILE_SIZE 32
 
 #define NUM_LAYERS 3
 

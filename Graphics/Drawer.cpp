@@ -100,16 +100,16 @@ void Drawer::drawText(const char* text, int32_t x, int32_t y){
 
 void Drawer::drawTile(uint32_t tile, int32_t x, int32_t y){
     SDL_Rect src;
-    src.x = (tile%30)*TILE_WIDTH;
-    src.y = (tile/30)*TILE_HEIGHT;
-    src.w = TILE_WIDTH;
-    src.h = TILE_HEIGHT;
+    src.x = (tile%30)*TILE_SIZE;
+    src.y = (tile/30)*TILE_SIZE;
+    src.w = TILE_SIZE;
+    src.h = TILE_SIZE;
 
     SDL_Rect dest;
     dest.x = x+offsetX;
     dest.y = y+offsetY;
-    dest.w = TILE_WIDTH;
-    dest.h = TILE_HEIGHT;
+    dest.w = TILE_SIZE;
+    dest.h = TILE_SIZE;
     SDL_RenderCopy(sdlRenderer, tilesTexture, &src, &dest);
 }
 
